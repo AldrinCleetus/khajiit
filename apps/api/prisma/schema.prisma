@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  firebaseId String  @unique // To link with Firebase Auth
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  listings  Listing[]
+}
+
+model Listing {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  price       Float
+  condition   String   // e.g. "new", "used-good", "used-fair"
+  location    String   // e.g. "San Francisco, CA"
+  exchangeMethod String // e.g. "pickup", "delivery", "both"
+  images      String[] // Array of URLs
+  tags        String[] // E.g. ["electronics", "apple", "laptop"]
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  sellerId    String
+  seller      User     @relation(fields: [sellerId], references: [id])
+  
+  // AI pricing fields
+  aiValuation String?  // e.g. "Great Deal", "Fair Price", "Overpriced"
+  aiEstimate  Float?   // Numeric estimate provided by AI
+  
+  status      String   @default("active") // "active", "sold", "flagged"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  slug     String    @unique
+  listings Listing[]
+}
