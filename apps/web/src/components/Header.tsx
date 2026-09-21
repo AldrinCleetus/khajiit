@@ -38,10 +38,11 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between gap-4">
         
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-1 text-2xl font-bold tracking-tight">
-          <span className="text-primary">Fair</span>
-          <span className="text-muted-foreground">Trade</span>
+        <Link to="/" className="text-xl font-bold text-primary flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <span className="text-primary-foreground text-sm font-black">KJ</span>
+          </div>
+          Khajiit (WIP)
         </Link>
         
         {/* Search & Location Group */}
@@ -88,8 +89,8 @@ export function Header() {
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </Button>
           
-          <Button asChild variant="outline" className="font-semibold">
-            <Link to={"/sell" as any}>Sell</Link>
+          <Button variant="default" asChild className="hidden sm:inline-flex bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Link to="/sell">Sell item</Link>
           </Button>
           
           <Link to="/profile" className="ml-2">

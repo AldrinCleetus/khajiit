@@ -3,13 +3,12 @@ import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  projectId: "fairtrade-market-7832",
-  appId: "1:294199347490:web:10f7831fb10237550cbd7b",
-  storageBucket: "fairtrade-market-7832.firebasestorage.app",
-  apiKey: "AIzaSyB6xYcyjtvmOsBeeUIuFqqqTsVNCE6fuO8",
-  authDomain: "fairtrade-market-7832.firebaseapp.com",
-  messagingSenderId: "294199347490",
-  projectNumber: "294199347490",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
 };
 
 // Initialize Firebase

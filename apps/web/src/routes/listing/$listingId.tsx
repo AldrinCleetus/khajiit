@@ -12,10 +12,14 @@ export const Route = createFileRoute('/listing/$listingId')({
 });
 
 function ListingDetailPage() {
+  const { listingId } = Route.useParams();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const { formatPrice } = usePreferences();
 
-  const item = {
+  // Mock Data
+  const isPlot = listingId === 'plot-1';
+
+  const cameraItem = {
     title: 'Sony Alpha a7 III Mirrorless Camera with 28-70mm Lens',
     basePrice: 115000, 
     imageUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
@@ -25,18 +29,8 @@ function ListingDetailPage() {
     createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
     condition: 'Used - Like New',
     tags: ['camera', 'sony', 'photography', 'mirrorless'],
-    description: `Selling my Sony a7 III mirrorless camera. It's in pristine condition, barely used. I bought it last year for a trip but haven't touched it much since. 
-    
-Comes with the original kit lens (28-70mm), original battery, charger, strap, and the box. Shutter count is strictly under 2,000. 
-
-No scratches on the sensor or the screen (screen protector applied since day 1). 
-Feel free to ask any questions or request more photos!`,
-    seller: {
-      name: 'Sarah Jenkins',
-      joined: 'Feb 2024',
-      rating: 4.8,
-      reviews: 12
-    },
+    description: `Selling my Sony a7 III mirrorless camera. It's in pristine condition, barely used. I bought it last year for a trip but haven't touched it much since.\n\nComes with the original kit lens (28-70mm), original battery, charger, strap, and the box. Shutter count is strictly under 2,000.\n\nFeel free to ask any questions or request more photos!`,
+    seller: { name: 'Sarah Jenkins', joined: 'Feb 2024', rating: 4.8, reviews: 12, type: 'individual' },
     options: [
       { id: 'opt-1', title: 'Camera + Lens (Full Bundle)', price: 115000 },
       { id: 'opt-2', title: 'Camera Body Only', price: 90000 },
@@ -45,21 +39,45 @@ Feel free to ask any questions or request more photos!`,
     publicOffers: [
       { id: 'o1', buyerName: 'Rahul', amount: 105000, timeAgo: '2h ago' },
       { id: 'o2', buyerName: 'Priya', amount: 95000, timeAgo: '5h ago' },
-      { id: 'o3', buyerName: 'Aman', amount: 80000, timeAgo: '1d ago' },
-      { id: 'o4', buyerName: 'Sanjay', amount: 110000, timeAgo: '30m ago' },
-      { id: 'o5', buyerName: 'Karthik', amount: 85000, timeAgo: '2d ago' },
-      { id: 'o6', buyerName: 'Neha', amount: 90000, timeAgo: '3d ago' },
-      { id: 'o7', buyerName: 'Vikram', amount: 75000, timeAgo: '4d ago' },
+      { id: 'o3', buyerName: 'Sanjay', amount: 110000, timeAgo: '30m ago' },
     ]
   };
+
+  const plotItem = {
+    title: '2400 sq.ft Premium Residential Plot in North Bangalore',
+    basePrice: 12500000, 
+    imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+    valuation: 'pending' as const,
+    location: 'Devanahalli, Bangalore',
+    exchangeMethod: 'In-Person Registration',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
+    condition: 'Clear Title / A-Khata',
+    tags: ['real-estate', 'plot', 'investment'],
+    description: `Prime residential plot available in the fast-developing North Bangalore corridor, just 15 mins from the International Airport.\n\n- Dimensions: 40x60 (2400 sq.ft)\n- Facing: East\n- Clear Titles, A-Khata\n- Bank Loan Approved\n- Corner Plot with dual road access (40ft & 30ft)\n\nPerfect for immediate construction or long-term investment. Check the interactive map for the exact plot boundaries.`,
+    seller: { name: 'Rohan Developer', joined: 'Jan 2022', rating: 4.9, reviews: 142, type: 'business' },
+    options: [
+      { id: 'opt-1', title: 'Outright Purchase', price: 12500000 },
+      { id: 'opt-2', title: 'With Construction Contract', price: 18500000 },
+    ],
+    publicOffers: [
+      { id: 'o1', buyerName: 'Anonymous', amount: 12000000, timeAgo: '1d ago' },
+      { id: 'o2', buyerName: 'K. Rao', amount: 12200000, timeAgo: '4h ago' },
+    ]
+  };
+
+  const item = isPlot ? plotItem : cameraItem;
 
   const [selectedOptionId, setSelectedOptionId] = useState(item.options[0].id);
   const activeOption = item.options.find(opt => opt.id === selectedOptionId) || item.options[0];
 
   const images = [
     item.imageUrl,
-    'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1560264280-88b68371db39?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+    isPlot 
+      ? 'https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+      : 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+    isPlot 
+      ? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+      : 'https://images.unsplash.com/photo-1560264280-88b68371db39?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
   ];
 
   const handlePrev = () => {
@@ -110,6 +128,59 @@ Feel free to ask any questions or request more photos!`,
                 <img src={img} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
               </button>
             ))}
+          </div>
+
+          {isPlot && (
+            <div className="mt-8 space-y-4">
+              <h2 className="text-xl font-bold text-foreground border-b pb-2">Property Location & Boundaries</h2>
+              <div className="relative w-full h-[300px] bg-muted rounded-xl border overflow-hidden group">
+                <img 
+                  src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+                  alt="Map view" 
+                  className="w-full h-full object-cover opacity-80"
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/20 backdrop-blur-[2px]">
+                  <MapPin size={32} className="text-primary mb-2 drop-shadow-md" />
+                  <Badge variant="default" className="shadow-lg">Exact Plot Boundaries Rendered Here</Badge>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!isPlot && (
+            <div className="mt-8 space-y-4">
+              <h2 className="text-xl font-bold text-foreground border-b pb-2">Approximate Location</h2>
+              <div className="relative w-full h-[250px] bg-muted rounded-xl border overflow-hidden group">
+                <img 
+                  src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+                  alt="Map view" 
+                  className="w-full h-full object-cover opacity-60 grayscale blur-[1px]"
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="w-32 h-32 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center">
+                    <MapPin size={24} className="text-primary drop-shadow-md" />
+                  </div>
+                  <span className="mt-2 text-sm font-semibold bg-background/80 px-2 py-1 rounded shadow-sm text-foreground">
+                    {item.location} (2km Radius)
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-8 space-y-6">
+            <h2 className="text-xl font-bold text-foreground border-b pb-2">Description</h2>
+            <div className="space-y-4 text-foreground/90 leading-relaxed">
+              {item.description.split('\n').map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+            
+            <div className="flex flex-wrap gap-2 pt-4">
+              {item.tags.map(tag => (
+                <Badge key={tag} variant="secondary">#{tag}</Badge>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -215,34 +286,44 @@ Feel free to ask any questions or request more photos!`,
             </div>
           </div>
 
-          <Card>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold">
-                {item.seller.name.charAt(0)}
+          <Card className={item.seller.type === 'business' ? 'border-blue-200 bg-blue-50/30' : ''}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold">
+                  {item.seller.name.charAt(0)}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-foreground">{item.seller.name}</h3>
+                    {item.seller.type === 'business' ? (
+                      <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50 h-5 px-1.5 text-[10px]">
+                        Verified Business
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="border-green-500 text-green-600 bg-green-50 h-5 px-1.5 text-[10px]">
+                        Individual
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
+                    Joined {item.seller.joined} • <Star size={12} className="fill-primary text-primary" /> {item.seller.rating} ({item.seller.reviews} reviews)
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-foreground">{item.seller.name}</h3>
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  Joined {item.seller.joined} • <Star size={12} className="fill-primary text-primary" /> {item.seller.rating} ({item.seller.reviews} reviews)
-                </p>
+              
+              <div className="mt-4 pt-4 border-t flex justify-end">
+                {item.seller.type === 'business' ? (
+                  <Button variant="secondary" className="w-full bg-blue-100 text-blue-700 hover:bg-blue-200">
+                    Visit Storefront
+                  </Button>
+                ) : (
+                  <Button variant="outline" className="w-full">
+                    View Profile
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
-        </div>
-      </div>
-
-      <div className="mt-12 lg:w-2/3 space-y-6">
-        <h2 className="text-xl font-bold text-foreground border-b pb-2">Description</h2>
-        <div className="space-y-4 text-foreground/90 leading-relaxed">
-          {item.description.split('\n').map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-        </div>
-        
-        <div className="flex flex-wrap gap-2 pt-4">
-          {item.tags.map(tag => (
-            <Badge key={tag} variant="secondary">#{tag}</Badge>
-          ))}
         </div>
       </div>
     </div>
