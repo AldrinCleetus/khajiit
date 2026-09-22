@@ -47,9 +47,9 @@ export function ListingCard({ listing }: ListingCardProps) {
 
   return (
     <Link to="/listing/$listingId" params={{ listingId: listing.id }} className="block h-full group">
-      <Card className={`h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${
+      <Card className={`h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md glass-card ${
         listing.isFeatured 
-          ? 'border-amber-400 ring-1 ring-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.1)]' 
+          ? 'border-accent ring-1 ring-accent/30 shadow-[0_0_15px_rgba(var(--accent),0.2)]' 
           : 'border-border/50 hover:border-border'
       }`}>
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
@@ -61,7 +61,7 @@ export function ListingCard({ listing }: ListingCardProps) {
           />
           <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
             {listing.isFeatured && (
-              <Badge className="bg-amber-500 hover:bg-amber-600 text-white shadow-sm flex items-center w-fit gap-1 text-[10px] font-bold">
+              <Badge className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-sm flex items-center w-fit gap-1 text-[10px] font-bold">
                 <Star size={10} className="fill-current" />
                 FEATURED
               </Badge>

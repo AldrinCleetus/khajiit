@@ -35,43 +35,42 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between gap-4">
-        
-        <Link to="/" className="text-xl font-bold text-primary flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground text-sm font-black">KJ</span>
-          </div>
-          Khajiit (WIP)
-        </Link>
+    <header className="sticky top-0 z-50 w-full border-b border-border glass-panel !rounded-none !border-x-0 !border-t-0 shadow-sm">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex gap-6 md:gap-10">
+          <Link to="/" className="flex items-center space-x-2">
+            <span className="inline-block font-bold text-xl tracking-tight text-primary">
+              Khajiit <span className="text-accent font-medium text-sm ml-1">(WIP)</span>
+            </span>
+          </Link>
+        </div>
         
         {/* Search & Location Group */}
         <div className="flex flex-1 items-center gap-2 max-w-2xl px-4">
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2 w-48 justify-between">
+              <Button variant="outline" className="flex items-center gap-2 w-48 justify-between rounded-pill">
                 <div className="flex items-center gap-2 overflow-hidden">
-                  <MapPin size={16} className="text-muted-foreground shrink-0" />
+                  <MapPin size={16} className="opacity-70 shrink-0" />
                   <span className="truncate">{selectedLocation}</span>
                 </div>
-                <ChevronDown size={16} className="text-muted-foreground shrink-0" />
+                <ChevronDown size={16} className="opacity-70 shrink-0" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuItem className="text-primary font-medium cursor-pointer">
+            <DropdownMenuContent align="start" className="w-56 rounded-[20px]">
+              <DropdownMenuItem className="text-primary font-medium cursor-pointer rounded-lg">
                 <Target size={16} className="mr-2" /> Use current location
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel>Recent Locations</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setSelectedLocation('Vytila')} className="cursor-pointer">
-                <MapPin size={16} className="mr-2 text-muted-foreground" /> Vytila
+              <DropdownMenuItem onClick={() => setSelectedLocation('Vytila')} className="cursor-pointer rounded-lg">
+                <MapPin size={16} className="mr-2 opacity-70" /> Vytila
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSelectedLocation('Kochi')} className="cursor-pointer">
-                <MapPin size={16} className="mr-2 text-muted-foreground" /> Kochi
+              <DropdownMenuItem onClick={() => setSelectedLocation('Kochi')} className="cursor-pointer rounded-lg">
+                <MapPin size={16} className="mr-2 opacity-70" /> Kochi
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSelectedLocation('Kerala')} className="cursor-pointer">
-                <MapPin size={16} className="mr-2 text-muted-foreground" /> Kerala
+              <DropdownMenuItem onClick={() => setSelectedLocation('Kerala')} className="cursor-pointer rounded-lg">
+                <MapPin size={16} className="mr-2 opacity-70" /> Kerala
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -79,7 +78,7 @@ export function Header() {
           <Input 
             type="search" 
             placeholder="Search items..." 
-            className="flex-1"
+            className="flex-1 rounded-pill"
           />
         </div>
         
@@ -89,7 +88,7 @@ export function Header() {
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </Button>
           
-          <Button variant="default" asChild className="hidden sm:inline-flex bg-emerald-600 hover:bg-emerald-700 text-white">
+          <Button asChild className="hidden sm:inline-flex rounded-pill bg-accent hover:bg-accent/90 text-accent-foreground font-bold shadow-md">
             <Link to="/sell">Sell item</Link>
           </Button>
           

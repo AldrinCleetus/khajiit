@@ -4,48 +4,77 @@
  
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222.2 84% 4.9%;
+    /* Background: #F4F4F5 */
+    --background: 240 5% 96%;
+    /* Primary Text */
+    --foreground: 228 15% 15%;
+    /* Surface */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 228 15% 15%;
+    /* Elevated */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --popover-foreground: 228 15% 15%;
+    /* Primary Action */
+    --primary: 228 15% 15%;
+    --primary-foreground: 0 0% 100%;
+    /* Secondary/Elevated Surface */
+    --secondary: 240 5% 96%;
+    /* Secondary Text */
+    --secondary-foreground: 222 6% 40%;
+    /* Muted Soft background */
+    --muted: 240 5% 92%;
+    /* Muted Text */
+    --muted-foreground: 216 5% 55%;
+    /* Accent: Blue-ish (Modern premium blue) */
+    --accent: 215 85% 50%;
+    /* Accent tint text/foreground */
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    /* Border: Subtle gray instead of pure white for better visibility */
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 215 85% 50%;
+    
+    /* Moderate rounding - soft but not broken */
+    --radius: 1.25rem; /* 20px */
+    
+    /* Subtle buttery background gradient for light mode */
+    --bg-gradient: 
+      radial-gradient(at 0% 0%, rgba(220, 235, 255, 0.6) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(255, 230, 245, 0.6) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(235, 230, 255, 0.6) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(225, 245, 255, 0.6) 0px, transparent 50%);
   }
  
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Fixed Dark Mode with proper contrast */
+    --background: 224 10% 8%;
+    --foreground: 210 20% 95%;
+    --card: 224 10% 12%;
+    --card-foreground: 210 20% 95%;
+    --popover: 224 10% 12%;
+    --popover-foreground: 210 20% 95%;
+    --primary: 210 20% 95%;
+    --primary-foreground: 224 10% 8%;
+    --secondary: 224 10% 16%;
+    --secondary-foreground: 210 20% 80%;
+    --muted: 224 10% 16%;
+    --muted-foreground: 215 15% 65%;
+    --accent: 215 85% 60%; /* Slightly brighter blue for dark mode */
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 224 10% 20%;
+    --input: 224 10% 20%;
+    --ring: 215 85% 60%;
+
+    /* Subtle buttery background gradient for dark mode */
+    --bg-gradient: 
+      radial-gradient(at 0% 0%, rgba(20, 40, 70, 0.4) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(60, 25, 50, 0.4) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(40, 25, 70, 0.4) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(20, 50, 60, 0.4) 0px, transparent 50%);
   }
 }
  
@@ -55,6 +84,59 @@
   }
   body {
     background-color: hsl(var(--background));
+    background-image: var(--bg-gradient);
+    background-attachment: fixed;
     color: hsl(var(--foreground));
+    font-family: "Inter", "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  }
+}
+
+/* Custom UI Components */
+@layer components {
+  /* Generous container spacing */
+  .container {
+    @apply px-4 sm:px-6 md:px-8 lg:px-12 max-w-7xl mx-auto;
+  }
+
+  /* The subtle glass/neumorphic treatment */
+  .glass-panel {
+    background: rgba(250, 250, 251, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 48px;
+    box-shadow: 
+      0 20px 50px rgba(0, 0, 0, 0.04), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+  }
+  
+  .dark .glass-panel {
+    background: rgba(20, 21, 26, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 
+      0 20px 50px rgba(0, 0, 0, 0.2), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Inner elevated card */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 36px;
+    box-shadow: 
+      0 10px 30px rgba(0, 0, 0, 0.03), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  .dark .glass-card {
+    background: rgba(30, 31, 36, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 
+      0 10px 30px rgba(0, 0, 0, 0.2), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* Extreme Pill shape for buttons */
+  .rounded-pill {
+    border-radius: 9999px;
   }
 }
