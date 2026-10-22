@@ -113,6 +113,20 @@ const MOCK_LISTINGS: Listing[] = [
     tags: ['embroidery', 'fashion', 'handmade'],
     description: 'Unique Levi\'s jacket with custom floral hand-embroidery on the back panel. Size Medium. One of a kind piece.'
   },
+  {
+    id: '8',
+    title: 'Any working PlayStation 4 (Slim or Pro)',
+    price: 15000,
+    imageUrl: 'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    valuation: 'pending',
+    location: 'Bangalore, KA',
+    exchangeMethod: 'Pickup',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    condition: 'Used-Fair',
+    tags: ['ps4', 'gaming', 'wanted'],
+    description: 'Looking to buy a working PS4. Don\'t care about cosmetic condition as long as it plays discs and doesn\'t overheat. Controllers optional.',
+    listingType: 'REQUESTING'
+  }
 ];
 
 import { Input } from '@/components/ui/input';

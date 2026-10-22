@@ -1,4 +1,4 @@
-import { Menu, ChevronDown, Car, Building2, Smartphone, Monitor, Armchair, Briefcase, Bike, Paintbrush } from 'lucide-react';
+import { Menu, ChevronDown, Building2, Smartphone, Monitor } from 'lucide-react';
 
 interface CategoryNode {
   name: string;
@@ -7,17 +7,6 @@ interface CategoryNode {
 }
 
 const CATEGORY_DATA: CategoryNode[] = [
-  {
-    name: 'Cars',
-    icon: <Car size={16} />,
-    subcategories: [
-      'SUVs',
-      'Sedans',
-      'Hatchbacks',
-      'EVs & Hybrids',
-      'Luxury Cars',
-    ]
-  },
   {
     name: 'Properties',
     icon: <Building2 size={16} />,
@@ -39,62 +28,27 @@ const CATEGORY_DATA: CategoryNode[] = [
     ]
   },
   {
-    name: 'Electronics & Appliances',
+    name: 'Electronics',
     icon: <Monitor size={16} />,
     subcategories: [
-      'TVs, Video - Audio',
-      'Kitchen & Other Appliances',
       'Computers & Laptops',
       'Cameras & Lenses',
-      'Games & Entertainment',
-    ]
-  },
-  {
-    name: 'Furniture',
-    icon: <Armchair size={16} />,
-    subcategories: [
-      'Sofa & Dining',
-      'Beds & Wardrobes',
-      'Home Decor & Garden',
-      'Kids Furniture',
-    ]
-  },
-  {
-    name: 'Jobs',
-    icon: <Briefcase size={16} />,
-    subcategories: [
-      'Data entry & Back office',
-      'Sales & Marketing',
-      'BPO & Telecaller',
-      'Driver',
-      'Office Assistant',
-    ]
-  },
-  {
-    name: 'Bikes',
-    icon: <Bike size={16} />,
-    subcategories: [
-      'Motorcycles',
-      'Scooters',
-      'Spare Parts',
-      'Bicycles',
-    ]
-  },
-  {
-    name: 'Custom Crafts & 3D Prints',
-    icon: <Paintbrush size={16} />,
-    subcategories: [
-      '3D Printed Models',
-      'Custom Embroidery',
-      'Handmade Jewelry',
-      'Art & Paintings',
-      'Woodworking',
+      'TVs, Audio & Video',
+      'Gaming & Consoles',
+      'Home Appliances',
     ]
   },
 ];
 
 const QUICK_LINKS = [
-  'Cars', 'Motorcycles', '3D Prints', 'Mobile Phones', 'For Sale: Houses & Apartments', 'Handmade'
+  'Properties',
+  'Houses & Apartments',
+  'Lands & Plots',
+  'Mobiles',
+  'Tablets',
+  'Electronics',
+  'Laptops',
+  'Cameras'
 ];
 
 export function CategoryNav() {
@@ -111,7 +65,7 @@ export function CategoryNav() {
             <ChevronDown size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
           </button>
           
-          <div className="absolute top-12 left-0 w-[800px] bg-background border rounded-b-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-6 grid grid-cols-4 gap-6">
+          <div className="absolute top-12 left-0 w-[640px] bg-background border rounded-b-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-6 grid grid-cols-3 gap-6">
             {CATEGORY_DATA.map(category => (
               <div key={category.name} className="flex flex-col gap-2">
                 <div className="flex items-center gap-2 font-semibold text-foreground">

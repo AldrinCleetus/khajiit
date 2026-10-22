@@ -65,19 +65,39 @@ function ListingDetailPage() {
     ]
   };
 
-  const item = isPlot ? plotItem : cameraItem;
+  const requestItem = {
+    title: 'Any working PlayStation 4 (Slim or Pro)',
+    basePrice: 15000, 
+    imageUrl: 'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    valuation: 'pending' as const,
+    location: 'Bangalore, KA',
+    exchangeMethod: 'Pickup',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    condition: 'Used-Fair',
+    tags: ['ps4', 'gaming', 'wanted'],
+    description: `Looking to buy a working PS4. Don't care about cosmetic condition as long as it plays discs and doesn't overheat. Controllers optional.\n\nWilling to travel anywhere within Bangalore to pick it up.`,
+    seller: { name: 'Karthik', joined: 'Oct 2023', rating: 5.0, reviews: 2, type: 'individual' },
+    listingType: 'REQUESTING' as const,
+    options: [
+      { id: 'opt-1', title: 'Budget', price: 15000 },
+    ],
+    publicOffers: []
+  };
 
-  const [selectedOptionId, setSelectedOptionId] = useState(item.options[0].id);
+  const item = listingId === '8' ? requestItem : (isPlot ? plotItem : cameraItem);
+  const isRequest = item.listingType === 'REQUESTING';
+
+  const [selectedOptionId, setSelectedOptionId] = useState(item.options[0]?.id);
   const activeOption = item.options.find(opt => opt.id === selectedOptionId) || item.options[0];
 
   const images = [
     item.imageUrl,
     isPlot 
       ? 'https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
-      : 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      : (isRequest ? item.imageUrl : 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'),
     isPlot 
       ? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
-      : 'https://images.unsplash.com/photo-1560264280-88b68371db39?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      : (isRequest ? item.imageUrl : 'https://images.unsplash.com/photo-1560264280-88b68371db39?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'),
   ];
 
   const handlePrev = () => {
@@ -209,67 +229,78 @@ function ListingDetailPage() {
             <h1 className="text-2xl font-bold text-foreground leading-tight">{item.title}</h1>
             
             <div className="flex items-end gap-3">
-              <span className="text-3xl font-bold text-primary">{formatPrice(activeOption.price)}</span>
-              <div className="mb-1">
-                <ValuationBadge status={item.valuation} />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="font-semibold text-foreground">Select Purchase Option</h3>
-            <div className="space-y-2">
-              {item.options.map((opt) => (
-                <div 
-                  key={opt.id} 
-                  className={`relative p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-                    selectedOptionId === opt.id 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-border hover:border-border/80 bg-card'
-                  }`}
-                  onClick={() => setSelectedOptionId(opt.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-foreground">{opt.title}</span>
-                    <span className="font-bold text-primary">{formatPrice(opt.price)}</span>
-                  </div>
-                  <div className={`absolute top-1/2 -translate-y-1/2 -left-3 w-6 h-6 rounded-full border-2 bg-background flex items-center justify-center ${
-                    selectedOptionId === opt.id ? 'border-primary' : 'border-muted'
-                  }`}>
-                    {selectedOptionId === opt.id && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                  </div>
+              {isRequest && <span className="text-xl text-muted-foreground mb-1">Budget:</span>}
+              <span className="text-3xl font-bold text-primary">{formatPrice(activeOption?.price || item.basePrice)}</span>
+              {!isRequest && (
+                <div className="mb-1">
+                  <ValuationBadge status={item.valuation} />
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
-          <div className="flex gap-3">
-            <Button className="flex-1" size="lg">Message Seller</Button>
-            <Button className="flex-1" variant="outline" size="lg">Make Offer</Button>
-          </div>
-
-          <Card className="bg-muted/30 border-dashed">
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-center gap-2 font-semibold text-primary">
-                <BarChart3 size={18} /> Transparent Bidding
-              </div>
-              <p className="text-sm text-muted-foreground">Top 5 highest offers:</p>
+          {!isRequest && item.options.length > 1 && (
+            <div className="space-y-3">
+              <h3 className="font-semibold text-foreground">Select Purchase Option</h3>
               <div className="space-y-2">
-                {[...item.publicOffers]
-                  .sort((a, b) => b.amount - a.amount)
-                  .slice(0, 5)
-                  .map((offer) => (
-                  <div key={offer.id} className="flex justify-between items-center text-sm">
-                    <span className="font-medium text-foreground">{offer.buyerName}</span>
-                    <div className="flex items-center gap-3">
-                      <span className="font-semibold text-primary">{formatPrice(offer.amount)}</span>
-                      <span className="text-xs text-muted-foreground w-12 text-right">{offer.timeAgo}</span>
+                {item.options.map((opt) => (
+                  <div 
+                    key={opt.id} 
+                    className={`relative p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                      selectedOptionId === opt.id 
+                        ? 'border-primary bg-primary/5' 
+                        : 'border-border hover:border-border/80 bg-card'
+                    }`}
+                    onClick={() => setSelectedOptionId(opt.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-foreground">{opt.title}</span>
+                      <span className="font-bold text-primary">{formatPrice(opt.price)}</span>
+                    </div>
+                    <div className={`absolute top-1/2 -translate-y-1/2 -left-3 w-6 h-6 rounded-full border-2 bg-background flex items-center justify-center ${
+                      selectedOptionId === opt.id ? 'border-primary' : 'border-muted'
+                    }`}>
+                      {selectedOptionId === opt.id && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
                     </div>
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <Button className="flex-1 rounded-pill" size="lg">
+              {isRequest ? 'Message Buyer' : 'Message Seller'}
+            </Button>
+            <Button className="flex-1 rounded-pill" variant="outline" size="lg">
+              {isRequest ? 'Offer Item' : 'Make Offer'}
+            </Button>
+          </div>
+
+          {!isRequest && (
+            <Card className="bg-muted/30 border-dashed">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center gap-2 font-semibold text-primary">
+                  <BarChart3 size={18} /> Transparent Bidding
+                </div>
+                <p className="text-sm text-muted-foreground">Top 5 highest offers:</p>
+                <div className="space-y-2">
+                  {[...item.publicOffers]
+                    .sort((a, b) => b.amount - a.amount)
+                    .slice(0, 5)
+                    .map((offer) => (
+                    <div key={offer.id} className="flex justify-between items-center text-sm">
+                      <span className="font-medium text-foreground">{offer.buyerName}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="font-semibold text-primary">{formatPrice(offer.amount)}</span>
+                        <span className="text-xs text-muted-foreground w-12 text-right">{offer.timeAgo}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid grid-cols-2 gap-4 py-4 border-y">
             <div className="space-y-1">
@@ -277,7 +308,7 @@ function ListingDetailPage() {
               <p className="font-medium text-foreground">{item.condition}</p>
             </div>
             <div className="space-y-1">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Location</span>
+               <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Location</span>
               <p className="font-medium text-foreground flex items-center gap-1"><MapPin size={14} className="text-muted-foreground" /> {item.location}</p>
             </div>
             <div className="space-y-1">
@@ -288,6 +319,9 @@ function ListingDetailPage() {
 
           <Card className={item.seller.type === 'business' ? 'border-blue-200 bg-blue-50/30' : ''}>
             <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-4 pb-2 border-b">
+                <h3 className="font-semibold text-foreground">{isRequest ? 'About the Buyer' : 'About the Seller'}</h3>
+              </div>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold">
                   {item.seller.name.charAt(0)}
@@ -313,11 +347,11 @@ function ListingDetailPage() {
               
               <div className="mt-4 pt-4 border-t flex justify-end">
                 {item.seller.type === 'business' ? (
-                  <Button variant="secondary" className="w-full bg-blue-100 text-blue-700 hover:bg-blue-200">
+                  <Button variant="secondary" className="w-full bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-pill">
                     Visit Storefront
                   </Button>
                 ) : (
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full rounded-pill">
                     View Profile
                   </Button>
                 )}

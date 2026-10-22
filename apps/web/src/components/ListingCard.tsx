@@ -18,6 +18,12 @@ export interface Listing {
   tags: string[];
   description: string;
   isFeatured?: boolean;
+  listingType?: 'OFFERING' | 'REQUESTING';
+  seller?: {
+    name: string;
+    avatarUrl: string;
+    type: 'individual' | 'business';
+  };
 }
 
 interface ListingCardProps {
@@ -44,6 +50,7 @@ function timeAgo(dateString: string) {
 export function ListingCard({ listing }: ListingCardProps) {
   const { formatPrice } = usePreferences();
   const formattedPrice = formatPrice(listing.price);
+  const isRequest = listing.listingType === 'REQUESTING';
 
   return (
     <Link to="/listing/$listingId" params={{ listingId: listing.id }} className="block h-full group">
@@ -51,12 +58,12 @@ export function ListingCard({ listing }: ListingCardProps) {
         listing.isFeatured 
           ? 'border-accent ring-1 ring-accent/30 shadow-[0_0_15px_rgba(var(--accent),0.2)]' 
           : 'border-border/50 hover:border-border'
-      }`}>
+      } ${isRequest ? 'bg-indigo-50/30 dark:bg-indigo-950/10' : ''}`}>
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
           <img 
             src={listing.imageUrl} 
             alt={listing.title} 
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" 
+            className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 ${isRequest ? 'opacity-80' : ''}`} 
             loading="lazy" 
           />
           <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
@@ -66,13 +73,22 @@ export function ListingCard({ listing }: ListingCardProps) {
                 FEATURED
               </Badge>
             )}
-            <ValuationBadge status={listing.valuation} />
+            {isRequest ? (
+              <Badge className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm flex items-center w-fit gap-1 text-[10px] font-bold uppercase tracking-wider">
+                LOOKING FOR
+              </Badge>
+            ) : (
+              <ValuationBadge status={listing.valuation} />
+            )}
           </div>
         </div>
         
         <CardContent className="p-4 flex flex-col h-[calc(100%-75%)]">
           <div className="flex flex-col gap-1">
             <p className="text-xl font-bold tracking-tight text-primary">
+              {isRequest ? (
+                <span className="text-sm font-normal text-muted-foreground mr-1">Budget:</span>
+              ) : null}
               {formattedPrice}
             </p>
             <h3 className="font-medium text-foreground line-clamp-2 leading-snug">
