@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { auth } from './firebase';
+import { auth } from '../firebase.js';
 
 export async function verifyToken(request: FastifyRequest, reply: FastifyReply) {
   const authHeader = request.headers.authorization;

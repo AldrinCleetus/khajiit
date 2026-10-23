@@ -1,11 +1,11 @@
-import * as admin from 'firebase-admin';
+import admin from 'firebase-admin';
+import { getAuth } from 'firebase-admin/auth';
+import { getStorage } from 'firebase-admin/storage';
 
 // Initialize Firebase Admin SDK
-// Providing the projectId is enough for verifyIdToken to work locally.
-// For full admin access to Firestore/Storage, you will need a service account key.
-admin.initializeApp({
-  projectId: 'fairtrade-market-7832',
+const app = admin.initializeApp({
+  projectId: 'khajiit-market-7832',
 });
 
-export const auth = admin.auth();
-export const storage = admin.storage();
+export const auth = getAuth(app);
+export const storage = getStorage(app);

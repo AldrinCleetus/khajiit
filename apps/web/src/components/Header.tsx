@@ -35,7 +35,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border glass-panel !rounded-none !border-x-0 !border-t-0 shadow-sm">
+    <header className="w-full border-b border-border bg-transparent shadow-none">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex gap-6 md:gap-10">
           <Link to="/" className="flex items-center space-x-2">

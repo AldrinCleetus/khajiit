@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState, useRef, type ChangeEvent } from 'react';
+import { useState, useRef, type ChangeEvent, type ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,6 @@ import {
   Info,
   Check,
   Tag,
-  Layers,
   Megaphone,
 } from 'lucide-react';
 
@@ -42,7 +41,6 @@ import {
   type PropertyFurnishing,
   type PropertyFacing,
   type PlotAreaUnit,
-  type ItemCondition,
 } from '@/types/listing-form';
 
 import { MobileModelSelector } from '@/components/sell/MobileModelSelector';
@@ -1665,15 +1663,15 @@ function SellPage() {
           </CardContent>
         </Card>
 
-        {/* AI Valuation Teaser */}
+        {/* Market Transparency Notice */}
         <div className="flex items-start gap-3 p-4 rounded-2xl bg-[hsl(var(--accent))]/5 border border-[hsl(var(--accent))]/20">
           <Sparkles size={20} className="text-[hsl(var(--accent))] mt-0.5 shrink-0" />
           <div className="text-xs">
             <strong className="text-foreground font-semibold block text-sm">
-              Khajiit AI Valuation Engine Active
+              Fair Market Price Check
             </strong>
             <p className="text-muted-foreground mt-0.5">
-              Once published, our valuation model analyzes historical market deals, specs, and regional trends to score your pricing (Great Deal, Fair, or Overpriced) for higher buyer confidence.
+              Once published, your listing receives an automatic fair-price rating based on verified local sales and specs, giving buyers immediate trust and confidence.
             </p>
           </div>
         </div>
@@ -1683,7 +1681,7 @@ function SellPage() {
 
   // ── Render Master Layout ───────────────────────────────────────────
 
-  const stepRenderers: Record<Step, () => JSX.Element> = {
+  const stepRenderers: Record<Step, () => ReactNode> = {
     type: renderTypeStep,
     details: renderDetailsStep,
     media: renderMediaStep,

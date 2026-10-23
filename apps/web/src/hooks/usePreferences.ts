@@ -1,5 +1,27 @@
 import { useState, useEffect } from 'react';
 
+export function formatIndianPrice(amount: number, isProperty: boolean = false): string {
+  if (isProperty) {
+    if (amount >= 10000000) {
+      const cr = (amount / 10000000).toFixed(2).replace(/\.00$/, '').replace(/(\.[1-9])0$/, '$1');
+      return `₹${cr} Cr`;
+    }
+    if (amount >= 100000) {
+      const lakh = (amount / 100000).toFixed(2).replace(/\.00$/, '').replace(/(\.[1-9])0$/, '$1');
+      return `₹${lakh} Lakh`;
+    }
+  }
+  try {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch (e) {
+    return `₹${amount.toLocaleString('en-IN')}`;
+  }
+}
+
 export function usePreferences() {
   const [locale, setLocale] = useState('en-IN');
   const [currency, setCurrency] = useState('INR');
@@ -10,23 +32,13 @@ export function usePreferences() {
     const savedLocale = localStorage.getItem('user_locale');
     
     // Always default to Indian market (en-IN / INR) unless explicitly overridden by user settings
-    // Do not use navigator.language here to prevent 1,00,000 INR from displaying as $100,000 USD
     setLocale(savedLocale || 'en-IN');
     setCurrency(savedCurrency || 'INR');
   }, []);
 
-  const formatPrice = (amount: number) => {
-    try {
-      return new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency: currency,
-        maximumFractionDigits: 0,
-      }).format(amount);
-    } catch (e) {
-      // Fallback if currency code is invalid
-      return `₹${amount.toLocaleString()}`;
-    }
+  const formatPrice = (amount: number, isProperty: boolean = false) => {
+    return formatIndianPrice(amount, isProperty);
   };
 
-  return { locale, currency, formatPrice };
+  return { locale, currency, formatPrice, formatIndianPrice };
 }

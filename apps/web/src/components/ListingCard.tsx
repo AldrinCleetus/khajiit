@@ -17,11 +17,15 @@ export interface Listing {
   condition: string;
   tags: string[];
   description: string;
+  category?: 'properties' | 'mobiles' | 'electronics';
+  subcategory?: string;
+  microSpecs?: string;
+  rateSubtext?: string;
   isFeatured?: boolean;
   listingType?: 'OFFERING' | 'REQUESTING';
   seller?: {
     name: string;
-    avatarUrl: string;
+    avatarUrl?: string;
     type: 'individual' | 'business';
   };
 }
@@ -34,7 +38,7 @@ function timeAgo(dateString: string) {
   const date = new Date(dateString);
   const now = new Date();
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  
+
   if (seconds < 60) return `${seconds}s ago`;
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
@@ -49,65 +53,103 @@ function timeAgo(dateString: string) {
 
 export function ListingCard({ listing }: ListingCardProps) {
   const { formatPrice } = usePreferences();
-  const formattedPrice = formatPrice(listing.price);
+  const isProperty = listing.category === 'properties';
+  const formattedPrice = formatPrice(listing.price, isProperty);
   const isRequest = listing.listingType === 'REQUESTING';
 
   return (
-    <Link to="/listing/$listingId" params={{ listingId: listing.id }} className="block h-full group">
-      <Card className={`h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md glass-card ${
-        listing.isFeatured 
-          ? 'border-accent ring-1 ring-accent/30 shadow-[0_0_15px_rgba(var(--accent),0.2)]' 
-          : 'border-border/50 hover:border-border'
-      } ${isRequest ? 'bg-indigo-50/30 dark:bg-indigo-950/10' : ''}`}>
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
-          <img 
-            src={listing.imageUrl} 
-            alt={listing.title} 
-            className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 ${isRequest ? 'opacity-80' : ''}`} 
-            loading="lazy" 
-          />
-          <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
-            {listing.isFeatured && (
-              <Badge className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-sm flex items-center w-fit gap-1 text-[10px] font-bold">
-                <Star size={10} className="fill-current" />
-                FEATURED
-              </Badge>
-            )}
-            {isRequest ? (
-              <Badge className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm flex items-center w-fit gap-1 text-[10px] font-bold uppercase tracking-wider">
-                LOOKING FOR
-              </Badge>
-            ) : (
-              <ValuationBadge status={listing.valuation} />
-            )}
-          </div>
-        </div>
-        
-        <CardContent className="p-4 flex flex-col h-[calc(100%-75%)]">
-          <div className="flex flex-col gap-1">
-            <p className="text-xl font-bold tracking-tight text-primary">
+    <Link
+      to="/listing/$listingId"
+      params={{ listingId: listing.id }}
+      className="block h-full group"
+    >
+      <Card
+        className={`h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md glass-card flex flex-col justify-between ${
+          listing.isFeatured
+            ? 'border-accent/60 ring-1 ring-accent/30 shadow-[0_0_15px_rgba(var(--accent),0.15)]'
+            : 'border-border/60 hover:border-border'
+        } ${isRequest ? 'bg-indigo-50/25 dark:bg-indigo-950/10' : ''}`}
+      >
+        <div>
+          {/* Product Image & Badges */}
+          <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+            <img
+              src={listing.imageUrl}
+              alt={listing.title}
+              className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+                isRequest ? 'opacity-85' : ''
+              }`}
+              loading="lazy"
+            />
+
+            {/* Top-left Badges (Max 2 badges in clean horizontal row) */}
+            <div className="absolute top-2 left-2 flex items-center gap-1.5 z-10 max-w-[90%]">
+              {listing.isFeatured && (
+                <Badge className="bg-amber-500 hover:bg-amber-600 text-white shadow-sm flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+                  <Star size={10} className="fill-current" />
+                  FEATURED
+                </Badge>
+              )}
               {isRequest ? (
-                <span className="text-sm font-normal text-muted-foreground mr-1">Budget:</span>
-              ) : null}
-              {formattedPrice}
-            </p>
-            <h3 className="font-medium text-foreground line-clamp-2 leading-snug">
-              {listing.title}
-            </h3>
-          </div>
-          
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {listing.condition.replace(/-/g, ' ')}
-            </span>
-            <span className="text-xs text-muted-foreground">• {timeAgo(listing.createdAt)}</span>
+                <Badge className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0">
+                  LOOKING FOR
+                </Badge>
+              ) : (
+                <ValuationBadge status={listing.valuation} />
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/50 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><MapPin size={14} /> {listing.location}</span>
-            <span className="flex items-center gap-1"><Package size={14} /> {listing.exchangeMethod}</span>
-          </div>
-        </CardContent>
+          <CardContent className="p-4 flex flex-col gap-2">
+            {/* Price & Rate Subtext */}
+            <div className="flex flex-wrap items-baseline gap-1.5">
+              <span className="text-xl font-bold tracking-tight text-primary">
+                {isRequest && (
+                  <span className="text-xs font-normal text-muted-foreground mr-1">
+                    Budget:
+                  </span>
+                )}
+                {formattedPrice}
+              </span>
+              {listing.rateSubtext && (
+                <span className="text-xs text-muted-foreground font-medium">
+                  {listing.rateSubtext}
+                </span>
+              )}
+            </div>
+
+            {/* Title */}
+            <h3 className="font-semibold text-foreground text-sm line-clamp-2 leading-snug group-hover:text-[hsl(var(--accent))] transition-colors">
+              {listing.title}
+            </h3>
+
+            {/* Category Micro-Specs */}
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-0.5">
+              {listing.microSpecs ? (
+                <span className="font-medium text-foreground/80 line-clamp-1">
+                  {listing.microSpecs}
+                </span>
+              ) : (
+                <span className="font-medium uppercase tracking-wider text-[11px]">
+                  {listing.condition.replace(/-/g, ' ')}
+                </span>
+              )}
+              <span className="shrink-0">• {timeAgo(listing.createdAt)}</span>
+            </div>
+          </CardContent>
+        </div>
+
+        {/* Footer: Location & Exchange */}
+        <div className="px-4 pb-3 pt-2 border-t border-border/50 text-xs text-muted-foreground flex items-center justify-between">
+          <span className="flex items-center gap-1 truncate max-w-[55%]">
+            <MapPin size={13} className="shrink-0 opacity-70" />
+            <span className="truncate">{listing.location}</span>
+          </span>
+          <span className="flex items-center gap-1 shrink-0 font-medium text-foreground/70">
+            <Package size={13} className="opacity-70" />
+            <span>{listing.exchangeMethod}</span>
+          </span>
+        </div>
       </Card>
     </Link>
   );

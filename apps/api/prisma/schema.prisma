@@ -1,52 +1,376 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Prisma schema for Khajiit Backend API
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider   = "postgresql"
+  extensions = [postgis]
 }
+
+// ── Enums ─────────────────────────────────────────────────────────────
+
+enum UserType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum ListingType {
+  OFFERING
+  REQUESTING
+}
+
+enum MainCategory {
+  PROPERTIES
+  MOBILES
+  ELECTRONICS
+}
+
+enum ValuationTier {
+  GREAT_DEAL
+  FAIR_PRICE
+  OVERPRICED
+  PENDING
+}
+
+enum ItemCondition {
+  NEW
+  USED_LIKE_NEW
+  USED_GOOD
+  USED_FAIR
+  FOR_PARTS
+}
+
+enum PriceType {
+  SALE
+  RENT
+}
+
+// ── Pre-Populated Device Catalog (Mobiles & Tablets + Cold-Start Pricing) ──
+
+model DeviceCatalog {
+  id               String           @id @default(uuid())
+  category         MainCategory     @default(MOBILES)
+  subcategory      String           // "Mobile Phones", "Tablets"
+  brand            String           // "Apple", "Samsung", "OnePlus"
+  model            String           // "iPhone 15 Pro"
+  ramOptions       String[]         // ["8GB"]
+  storageOptions   String[]         // ["128GB", "256GB", "512GB", "1TB"]
+  
+  // Baseline Pricing for Cold-Start Valuation Worker
+  launchMsrp       Decimal          @db.Decimal(12, 2)
+  referenceUsedMin Decimal          @db.Decimal(12, 2)
+  referenceUsedMax Decimal          @db.Decimal(12, 2)
+  
+  mobileListings   MobileMetadata[]
+  
+  @@unique([brand, model])
+  @@index([brand, model])
+}
+
+// ── User & Business Storefront ─────────────────────────────────────────
 
 model User {
-  id        String   @id @default(uuid())
-  firebaseId String  @unique // To link with Firebase Auth
-  email     String   @unique
-  name      String?
-  avatarUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  listings  Listing[]
+  id                  String         @id @default(uuid())
+  firebaseUid         String         @unique
+  phoneNumber         String         @unique
+  email               String?        @unique
+  name                String
+  avatarUrl           String?
+  userType            UserType       @default(INDIVIDUAL)
+  
+  // Verification flags
+  isPhoneVerified     Boolean        @default(false)
+  isIdVerified        Boolean        @default(false)
+  
+  // Metrics
+  dealCount           Int            @default(0)
+  avgRating           Float          @default(0.0)
+  reviewCount         Int            @default(0)
+  responseTimeMin     Int            @default(15)
+  
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  storeProfile        StoreProfile?
+  listings            Listing[]
+  offers              Offer[]
+  reviewsWritten      Review[]       @relation("ReviewsWritten")
+  reviewsReceived     Review[]       @relation("ReviewsReceived")
+  favorites           Favorite[]
+  buyerConversations  Conversation[] @relation("BuyerConversations")
+  sellerConversations Conversation[] @relation("SellerConversations")
+  messagesSent        Message[]
 }
+
+model StoreProfile {
+  id              String         @id @default(uuid())
+  userId          String         @unique
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  storeName       String
+  gstin           String?        @unique
+  isGstVerified   Boolean        @default(false)
+  
+  shopAddress     String
+  landmark        String?
+  city            String
+  pincode         String
+  latitude        Float
+  longitude       Float
+  
+  bannerUrl       String?
+  operatingHours  Json           // { mon_sat: "10:00-21:00", sun: "11:00-19:00" }
+  policies        Json?          // { returnDays: 7, exchangeAccepted: true, emiAvailable: true }
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+// ── Core Listings (Static Masked Coordinates + PostGIS Point) ──────────
 
 model Listing {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  price       Float
-  condition   String   // e.g. "new", "used-good", "used-fair"
-  location    String   // e.g. "San Francisco, CA"
-  exchangeMethod String // e.g. "pickup", "delivery", "both"
-  images      String[] // Array of URLs
-  tags        String[] // E.g. ["electronics", "apple", "laptop"]
-  categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id])
-  sellerId    String
-  seller      User     @relation(fields: [sellerId], references: [id])
+  id                String            @id @default(uuid())
+  sellerId          String
+  seller            User              @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   
-  // AI pricing fields
-  aiValuation String?  // e.g. "Great Deal", "Fair Price", "Overpriced"
-  aiEstimate  Float?   // Numeric estimate provided by AI
+  listingType       ListingType       @default(OFFERING)
+  category          MainCategory
+  subcategory       String
   
-  status      String   @default("active") // "active", "sold", "flagged"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  title             String
+  description       String
+  price             Decimal           @db.Decimal(12, 2)
+  negotiable        Boolean           @default(true)
+  
+  // Market Valuation Engine
+  valuation         ValuationTier     @default(PENDING)
+  marketEstimateMin Decimal?          @db.Decimal(12, 2)
+  marketEstimateMax Decimal?          @db.Decimal(12, 2)
+  
+  // Location & Dual-Tier Geospatial Privacy
+  locationName      String            // e.g. "Indiranagar, Bengaluru"
+  latitude          Float             // Private: Only exposed for PROPERTIES
+  longitude         Float             // Private: Only exposed for PROPERTIES
+  maskedLat         Float             // Public: Generated ONCE on creation for MOBILES/ELECTRONICS
+  maskedLng         Float             // Public: Generated ONCE on creation for MOBILES/ELECTRONICS
+  privacyRadiusM    Int               @default(1500)
+  locationPoint     Unsupported("geography(Point, 4326)")?
+  
+  exchangeMethods   String[]
+  tags              String[]
+  status            String            @default("ACTIVE") // ACTIVE, SOLD, ARCHIVED
+  
+  images            ListingImage[]
+  purchaseOptions   PurchaseOption[]
+  offers            Offer[]
+  reviews           Review[]
+  favorites         Favorite[]
+  conversations     Conversation[]
+  
+  propertyMeta      PropertyMetadata?
+  mobileMeta        MobileMetadata?
+  electronicsMeta   ElectronicsMetadata?
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([category, status])
+  @@index([price])
+  @@index([locationPoint], type: Gist)
 }
 
-model Category {
-  id       String    @id @default(uuid())
-  name     String    @unique
-  slug     String    @unique
-  listings Listing[]
+model ListingImage {
+  id          String   @id @default(uuid())
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url         String
+  order       Int      @default(0)
+  isCover     Boolean  @default(false)
+}
+
+model PurchaseOption {
+  id          String   @id @default(uuid())
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  title       String   // e.g. "Camera + Lens (Full Bundle)" or "28-70mm Lens Only"
+  price       Decimal  @db.Decimal(12, 2)
+  isDefault   Boolean  @default(false)
+  
+  offers      Offer[]
+}
+
+// ── Category-Specific Metadata Tables ─────────────────────────────────
+
+model PropertyMetadata {
+  id                  String       @id @default(uuid())
+  listingId           String       @unique
+  listing             Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  priceType           PriceType    @default(SALE)
+  securityDeposit     Decimal?     @db.Decimal(12, 2)
+  
+  // Area Specs
+  carpetAreaSqFt      Float?
+  builtUpAreaSqFt     Float?
+  plotArea            Float?
+  plotUnit            String?      // "Sq. Ft.", "Cent", "Acre"
+  pricePerSqFt        Decimal?     @db.Decimal(10, 2)
+  
+  // Residential
+  bhk                 String?      // "1", "2", "3", "4", "4+"
+  bathrooms           Int?
+  furnishing          String?      // "Furnished", "Semi-Furnished", "Unfurnished"
+  floorNo             Int?
+  totalFloors         Int?
+  carParking          Boolean      @default(false)
+  
+  // Land & Commercial
+  dimensions          String?      // "40 x 60 ft"
+  facing              String?      // "East", "North"
+  boundaryWall        Boolean      @default(false)
+  roadWidthFt         Float?
+  
+  // GeoJSON for frontend rendering + Native PostGIS Polygon for spatial validation
+  boundaryPolygon     Json?
+  boundaryGeom        Unsupported("geometry(Polygon, 4326)")?
+  mappedAreaSqFt      Float?
+
+  @@index([boundaryGeom], type: Gist)
+}
+
+model MobileMetadata {
+  id                  String         @id @default(uuid())
+  listingId           String         @unique
+  listing             Listing        @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  deviceCatalogId     String?
+  deviceCatalog       DeviceCatalog? @relation(fields: [deviceCatalogId], references: [id])
+  isCustomModel       Boolean        @default(false) // True if user clicked "Enter model manually"
+  
+  brand               String
+  model               String
+  condition           ItemCondition
+  ram                 String?        // "8GB"
+  storage             String?        // "256GB"
+  batteryHealthPct    Int?           // 94
+  
+  includedInBox       String[]       // ["Original Box", "Charger", "Invoice"]
+  warrantyStatus      String         // "Under Warranty", "Out of Warranty"
+  invoiceAvailable    Boolean        @default(false)
+}
+
+model ElectronicsMetadata {
+  id                  String       @id @default(uuid())
+  listingId           String       @unique
+  listing             Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  brand               String
+  model               String
+  condition           ItemCondition
+  ageOfItem           String       // "< 6 months", "1-2 Years"
+  invoiceAvailable    Boolean      @default(false)
+  underWarranty       Boolean      @default(false)
+  
+  // Dynamic Specs stored as typed attributes
+  shutterCount        Int?
+  mountType           String?
+  sensorFormat        String?
+  cpu                 String?
+  ram                 String?
+  storageTypeSize     String?
+  gpu                 String?
+  screenSize          String?
+  displayTech         String?
+}
+
+// ── Bidding, Trust & Social Features ──────────────────────────────────
+
+model Offer {
+  id               String          @id @default(uuid())
+  listingId        String
+  listing          Listing         @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  purchaseOptionId String?
+  purchaseOption   PurchaseOption? @relation(fields: [purchaseOptionId], references: [id], onDelete: SetNull)
+  
+  buyerId          String
+  buyer            User            @relation(fields: [buyerId], references: [id])
+  
+  amount           Decimal         @db.Decimal(12, 2)
+  isBinding        Boolean         @default(true)
+  status           String          @default("PENDING") // PENDING, ACCEPTED, DECLINED, EXPIRED
+  
+  createdAt        DateTime        @default(now())
+
+  @@index([listingId, amount(sort: Desc)])
+}
+
+model Review {
+  id              String       @id @default(uuid())
+  listingId       String
+  listing         Listing      @relation(fields: [listingId], references: [id])
+  reviewerId      String
+  reviewer        User         @relation("ReviewsWritten", fields: [reviewerId], references: [id])
+  sellerId        String
+  seller          User         @relation("ReviewsReceived", fields: [sellerId], references: [id])
+  
+  rating          Int          // 1-5
+  comment         String
+  tags            String[]     // ["Original bill provided", "Smooth pickup"]
+  
+  createdAt       DateTime     @default(now())
+}
+
+model Favorite {
+  id              String       @id @default(uuid())
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId       String
+  listing         Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime     @default(now())
+
+  @@unique([userId, listingId])
+}
+
+// ── Phone-Masked Chat & Real-Time Anti-Scam Scanner ──────────────────
+
+model Conversation {
+  id            String    @id @default(uuid())
+  listingId     String
+  listing       Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  buyerId       String
+  buyer         User      @relation("BuyerConversations", fields: [buyerId], references: [id])
+  sellerId      String
+  seller        User      @relation("SellerConversations", fields: [sellerId], references: [id])
+  
+  // Phone numbers remain masked until seller explicitly shares pickup details
+  phoneRevealed Boolean   @default(false)
+  
+  messages      Message[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([listingId, buyerId])
+}
+
+model Message {
+  id                String       @id @default(uuid())
+  conversationId    String
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId          String
+  sender            User         @relation(fields: [senderId], references: [id])
+  
+  body              String
+  
+  // Populated by the Anti-Scam Regex Interceptor (UPI QR / Courier / Advance Fee triggers)
+  isScamFlagged     Boolean      @default(false)
+  scamWarningReason String?      // e.g. "Potential UPI QR / Advance Payment Scam Detected"
+  
+  createdAt         DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
 }
